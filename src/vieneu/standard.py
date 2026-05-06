@@ -114,7 +114,7 @@ class VieNeuTTS(BaseVieneuTTS):
             self._is_quantized_model = True
         else:
             from transformers import AutoTokenizer, AutoModelForCausalLM
-            self.tokenizer = AutoTokenizer.from_pretrained(backbone_repo, token=hf_token)
+            self.tokenizer = AutoTokenizer.from_pretrained(backbone_repo, token=hf_token, trust_remote_code=True)
 
             # Configure tokenizer for batching
             self.tokenizer.padding_side = "left"
@@ -122,9 +122,11 @@ class VieNeuTTS(BaseVieneuTTS):
                 self.tokenizer.pad_token = self.tokenizer.eos_token
 
             import torch
-            self.backbone = AutoModelForCausalLM.from_pretrained(backbone_repo, token=hf_token).to(
-                torch.device(backbone_device)
-            )
+            self.backbone = AutoModelForCausalLM.from_pretrained(
+                backbone_repo, 
+                token=hf_token, 
+                trust_remote_code=True
+            ).to(torch.device(backbone_device))
 
             # Optional torch.compile for non-Windows/non-Mac platforms if desired
             if os.getenv("VIENEU_COMPILE") == "1" and platform.system() == "Linux":
