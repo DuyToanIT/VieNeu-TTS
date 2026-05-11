@@ -20,7 +20,7 @@
 
 ## ✨ Key Features
 - **10,000+ Hours Training**: Trained on a massive English-Vietnamese dataset for human-like prosody.
-- **Bilingual (En-Vi) Code-switching**: Seamless transitions between languages.
+- **Bilingual (En-Vi) Code-switching**: Powered by [**sea-g2p**](https://github.com/pnnbao97/sea-g2p) for high-fidelity pronunciation and seamless transitions between Vietnamese and English.
 - **Podcast & Conversation Mode**: Multi-speaker dialogue support with automatic character detection.
 - **Instant Voice Cloning**: Clone any voice with just **3-5 seconds** of reference audio.
 - **Ultra-Fast Performance**: Optimized for **GPU (LMDeploy)** and **CPU (GGUF/ONNX)**.
