@@ -50,6 +50,45 @@ services:
     restart: unless-stopped
 
   # ========================================================
+  # API Profile — REST endpoints for n8n / Oasis
+  # VIENEU_MODE controls the backend:
+  #   fast     (default) : LMDeploy in-process, GPU required
+  #   standard           : GGUF on CPU, no GPU needed
+  #   remote             : delegates to the 'serve' container
+  # Usage (GPU):  --profile api
+  # Usage (CPU):  VIENEU_MODE=standard --profile api
+  # ========================================================
+  api:
+    profiles: ["api"]
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.serve
+    container_name: vieneu-tts-api
+    ports:
+      - "${API_PORT:-8080}:8080"
+    environment:
+      - HF_HOME=${HF_HOME:-/root/.cache/huggingface}
+      - VIENEU_MODE=${VIENEU_MODE:-fast}
+      - MODEL_NAME=${MODEL_NAME:-pnnbao-ump/VieNeu-TTS-v2}
+      - LMDEPLOY_URL=${LMDEPLOY_URL:-http://vieneu-tts-serve:23333/v1}
+      - MEMORY_UTIL=${MEMORY_UTIL:-0.5}
+      - API_HOST=0.0.0.0
+      - API_PORT=8080
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - huggingface_cache:/root/.cache/huggingface
+    entrypoint: ["uv", "run", "python", "apps/api_proxy.py"]
+    command: []
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+  # ========================================================
   # GPU Profile (Gradio App)
   # ========================================================
   gpu:
