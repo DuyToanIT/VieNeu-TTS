@@ -39,6 +39,7 @@ MODE = os.getenv("VIENEU_MODE", "fast")
 MODEL_NAME = os.getenv("MODEL_NAME", "pnnbao-ump/VieNeu-TTS-v2")
 LMDEPLOY_URL = os.getenv("LMDEPLOY_URL", "http://localhost:23333/v1")
 MEMORY_UTIL = float(os.getenv("MEMORY_UTIL", "0.5"))
+GPU_DEVICE = os.getenv("GPU_DEVICE", "cuda:0")
 HOST = os.getenv("API_HOST", "0.0.0.0")
 PORT = int(os.getenv("API_PORT", "8080"))
 
@@ -53,7 +54,8 @@ _NOT_LOADED = "Model not loaded yet"
 @app.on_event("startup")
 async def startup():
     global tts
-    logger.info(f"Starting VieNeu-TTS API — mode={MODE} model={MODEL_NAME}")
+    gpu_info = GPU_DEVICE if MODE == "fast" else "cpu"
+    logger.info(f"Starting VieNeu-TTS API — mode={MODE} model={MODEL_NAME} device={gpu_info}")
 
     from vieneu import Vieneu
 
@@ -61,10 +63,11 @@ async def startup():
         tts = Vieneu(
             mode="fast",
             backbone_repo=MODEL_NAME,
-            backbone_device="cuda",
+            backbone_device=GPU_DEVICE,
             codec_repo="neuphonic/distill-neucodec",
-            codec_device="cuda",
+            codec_device=GPU_DEVICE,
             memory_util=MEMORY_UTIL,
+            tp=1,
         )
     elif MODE == "standard":
         tts = Vieneu(

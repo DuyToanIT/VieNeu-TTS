@@ -28,6 +28,7 @@ services:
       - "${SERVE_PORT:-23333}:23333"
     environment:
       - HF_HOME=${HF_HOME:-/root/.cache/huggingface}
+      - CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-0}
       - PYTHONUNBUFFERED=1
     volumes:
       - huggingface_cache:/root/.cache/huggingface
@@ -38,14 +39,16 @@ services:
       - "${MODEL_NAME:-pnnbao-ump/VieNeu-TTS-v2}"
       - "--port"
       - "23333"
+      - "--tp"
+      - "1"
       - "--memory-util"
-      - "${MEMORY_UTIL:-0.3}"
+      - "${MEMORY_UTIL:-0.5}"
     deploy:
       resources:
         reservations:
           devices:
             - driver: nvidia
-              count: all
+              device_ids: ['0']
               capabilities: [gpu]
     restart: unless-stopped
 
@@ -72,6 +75,8 @@ services:
       - MODEL_NAME=${MODEL_NAME:-pnnbao-ump/VieNeu-TTS-v2}
       - LMDEPLOY_URL=${LMDEPLOY_URL:-http://vieneu-tts-serve:23333/v1}
       - MEMORY_UTIL=${MEMORY_UTIL:-0.5}
+      - GPU_DEVICE=${GPU_DEVICE:-cuda:0}
+      - CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-0}
       - API_HOST=0.0.0.0
       - API_PORT=8080
       - PYTHONUNBUFFERED=1
@@ -84,7 +89,7 @@ services:
         reservations:
           devices:
             - driver: nvidia
-              count: all
+              device_ids: ['0']
               capabilities: [gpu]
     restart: unless-stopped
 
